@@ -24,10 +24,8 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 router = Router()
 
-# ПУТЬ К БАЗЕ ДАННЫХ ДЛЯ BOTHOST
 DB_PATH = "/app/data/support.db"
 
-# Автоматическое переключение на локальный путь, если запускаете тест на своем ПК
 if not os.path.exists("/app/data"):
     DB_PATH = "support.db"
 
@@ -122,7 +120,10 @@ async def cmd_start(message: Message, state: FSMContext):
         await message.answer("💬 У вас уже есть активный чат с поддержкой. Просто пишите сообщения сюда.")
         return
     await state.clear()
-    await message.answer("👋 Здравствуйте! Выберите категорию вашего обращения:", reply_markup=get_categories_keyboard())
+    await message.answer(
+        "👋 Здравствуйте! Выберите категорию вашего обращения:",
+        reply_markup=get_categories_keyboard()
+    )
     await state.set_state(Form.waiting_for_category)
 
 
@@ -132,13 +133,22 @@ async def process_category_choice(callback: CallbackQuery, state: FSMContext):
     await state.update_data(category=category)
 
     if category == "idea":
-        await callback.message.edit_text("1️⃣ **Ваша идея:**\nНапишите краткую суть в одном предложении.")
+        await callback.message.edit_text(
+            "1️⃣ <b>Ваша идея:</b>\nНапишите краткую суть в одном предложении.",
+            parse_mode="HTML"
+        )
         await state.set_state(Form.idea_1)
     elif category == "media":
-        await callback.message.edit_text("1️⃣ **Ссылка на ваш ТТ/ЮТ канал:**")
+        await callback.message.edit_text(
+            "1️⃣ <b>Ссылка на ваш ТТ/ЮТ канал:</b>",
+            parse_mode="HTML"
+        )
         await state.set_state(Form.media_1)
     elif category == "bug":
-        await callback.message.edit_text("1️⃣ **Что за баг вы обнаружили?** Назовите его коротко.")
+        await callback.message.edit_text(
+            "1️⃣ <b>Что за баг вы обнаружили?</b> Назовите его коротко.",
+            parse_mode="HTML"
+        )
         await state.set_state(Form.bug_1)
     await callback.answer()
 
@@ -147,14 +157,20 @@ async def process_category_choice(callback: CallbackQuery, state: FSMContext):
 @router.message(Form.idea_1)
 async def process_idea_1(message: Message, state: FSMContext):
     await state.update_data(q1=message.text)
-    await message.answer("2️⃣ **В чем заключается смысл идеи?** Опишите подробнее:")
+    await message.answer(
+        "2️⃣ <b>В чем заключается смысл идеи?</b> Опишите подробнее:",
+        parse_mode="HTML"
+    )
     await state.set_state(Form.idea_2)
 
 
 @router.message(Form.idea_2)
 async def process_idea_2(message: Message, state: FSMContext):
     await state.update_data(q2=message.text)
-    await message.answer("3️⃣ **Польза вашей идеи:** Чем она поможет проекту?")
+    await message.answer(
+        "3️⃣ <b>Польза вашей идеи:</b> Чем она поможет проекту?",
+        parse_mode="HTML"
+    )
     await state.set_state(Form.idea_3)
 
 
@@ -162,10 +178,10 @@ async def process_idea_2(message: Message, state: FSMContext):
 async def process_idea_3(message: Message, state: FSMContext):
     data = await state.get_data()
     text_report = (
-        f"💡 **Категория:** Предложение / Идея\n\n"
-        f"1. **Ваша идея:** {data['q1']}\n"
-        f"2. **Смысл идеи:** {data['q2']}\n"
-        f"3. **Польза идеи:** {message.text}"
+        f"💡 <b>Категория:</b> Предложение / Идея\n\n"
+        f"1. <b>Ваша идея:</b> {data['q1']}\n"
+        f"2. <b>Смысл идеи:</b> {data['q2']}\n"
+        f"3. <b>Польза идеи:</b> {message.text}"
     )
     await send_ticket_to_admin(message, state, "Идея", text_report)
 
@@ -174,14 +190,14 @@ async def process_idea_3(message: Message, state: FSMContext):
 @router.message(Form.media_1)
 async def process_media_1(message: Message, state: FSMContext):
     await state.update_data(q1=message.text)
-    await message.answer("2️⃣ **Ваши средние просмотры:**")
+    await message.answer("2️⃣ <b>Ваши средние просмотры:</b>", parse_mode="HTML")
     await state.set_state(Form.media_2)
 
 
 @router.message(Form.media_2)
 async def process_media_2(message: Message, state: FSMContext):
     await state.update_data(q2=message.text)
-    await message.answer("3️⃣ **Ваш контакт для связи (ТГ/ДС):**")
+    await message.answer("3️⃣ <b>Ваш контакт для связи (ТГ/ДС):</b>", parse_mode="HTML")
     await state.set_state(Form.media_3)
 
 
@@ -189,10 +205,10 @@ async def process_media_2(message: Message, state: FSMContext):
 async def process_media_3(message: Message, state: FSMContext):
     data = await state.get_data()
     text_report = (
-        f"🎥 **Категория:** Заявка на Медиа\n\n"
-        f"1. **Ссылка на ТТ/ЮТ:** {data['q1']}\n"
-        f"2. **Средние просмотры:** {data['q2']}\n"
-        f"3. **Контакт связи:** {message.text}"
+        f"🎥 <b>Категория:</b> Заявка на Медиа\n\n"
+        f"1. <b>Ссылка на ТТ/ЮТ:</b> {data['q1']}\n"
+        f"2. <b>Средние просмотры:</b> {data['q2']}\n"
+        f"3. <b>Контакт связи:</b> {message.text}"
     )
     await send_ticket_to_admin(message, state, "Медиа", text_report)
 
@@ -201,7 +217,10 @@ async def process_media_3(message: Message, state: FSMContext):
 @router.message(Form.bug_1)
 async def process_bug_1(message: Message, state: FSMContext):
     await state.update_data(q1=message.text)
-    await message.answer("2️⃣ **В чем суть бага?** Как его воспроизвести?")
+    await message.answer(
+        "2️⃣ <b>В чем суть бага?</b> Как его воспроизвести?",
+        parse_mode="HTML"
+    )
     await state.set_state(Form.bug_2)
 
 
@@ -209,9 +228,9 @@ async def process_bug_1(message: Message, state: FSMContext):
 async def process_bug_2(message: Message, state: FSMContext):
     data = await state.get_data()
     text_report = (
-        f"🐛 **Категория:** Сообщение о Баге\n\n"
-        f"1. **Баг:** {data['q1']}\n"
-        f"2. **В чем суть бага:** {message.text}"
+        f"🐛 <b>Категория:</b> Сообщение о Баге\n\n"
+        f"1. <b>Баг:</b> {data['q1']}\n"
+        f"2. <b>В чем суть бага:</b> {message.text}"
     )
     await send_ticket_to_admin(message, state, "Баг", text_report)
 
@@ -239,11 +258,12 @@ async def send_ticket_to_admin(message: Message, state: FSMContext, category_nam
 
     await bot.send_message(
         chat_id=ADMIN_ID,
-        text=f"📬 **Новая заявка #{ticket_id}**\n"
+        text=f"📬 <b>Новая заявка #{ticket_id}</b>\n"
              f"👤 От: {username} (ID: {user_id})\n"
              f"----------------------------------\n\n"
              f"{text_report}",
-        reply_markup=kb
+        reply_markup=kb,
+        parse_mode="HTML"
     )
 
 
@@ -253,7 +273,8 @@ async def user_chat_router(message: Message):
         username = f"@{message.from_user.username}" if message.from_user.username else "Пользователь"
         await bot.send_message(
             chat_id=ADMIN_ID,
-            text=f"💬 **Сообщение от {username}:**\n\n{message.text}"
+            text=f"💬 <b>Сообщение от {username}:</b>\n\n{message.text}",
+            parse_mode="HTML"
         )
     else:
         await message.answer("❌ Нажмите /start, чтобы открыть меню выбора категорий.")
@@ -285,7 +306,9 @@ async def admin_reply_callback(callback: CallbackQuery, state: FSMContext):
         target_user_id=user_id,
         admin_msg_id=callback.message.message_id
     )
-    await callback.message.answer(f"✍️ Введите первый ответ на заявку #{ticket_id}. Это откроет прямой диалог:")
+    await callback.message.answer(
+        f"✍️ Введите первый ответ на заявку #{ticket_id}. Это откроет прямой диалог:"
+    )
     await state.set_state(AdminReply.waiting_for_first_answer)
     await callback.answer()
 
@@ -321,7 +344,7 @@ async def process_admin_first_answer(message: Message, state: FSMContext):
         ])
 
         await message.answer(
-            f"✅ Чат открыт. Ваши сообщения пересылаются пользователю.",
+            "✅ Чат открыт. Ваши сообщения пересылаются пользователю.",
             reply_markup=kb
         )
 
@@ -350,7 +373,9 @@ async def admin_chat_router(message: Message):
         except Exception as e:
             await message.answer(f"❌ Доставка сорвалась: {e}")
     else:
-        await message.answer("ℹ️ Сейчас нет активных чатов. Используйте кнопку «Ответить» под входящими заявками.")
+        await message.answer(
+            "ℹ️ Сейчас нет активных чатов. Используйте кнопку «Ответить» под входящими заявками."
+        )
 
 
 @router.callback_query(F.data.startswith("close_"))
