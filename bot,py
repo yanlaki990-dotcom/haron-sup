@@ -24,7 +24,7 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 router = Router()
 
-# ПУТЬ К БАЗЕ ДАННЫХ ДЛЯ BOTHOST (Сохраняет файл между перезапусками контейнера)
+# ПУТЬ К БАЗЕ ДАННЫХ ДЛЯ BOTHOST
 DB_PATH = "/app/data/support.db"
 
 # Автоматическое переключение на локальный путь, если запускаете тест на своем ПК
@@ -110,7 +110,7 @@ def get_categories_keyboard():
 @router.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
     if is_user_in_chat(message.from_user.id):
-        await message.answer("💬 У вас уже есть активный диалог с поддержкой. Просто пишите ваши сообщения сюда.")
+        await message.answer("💬 У вас уже есть active чат с поддержкой. Просто пишите сообщения сюда.")
         return
     await state.clear()
     await message.answer("👋 Здравствуйте! Выберите категорию вашего обращения:", reply_markup=get_categories_keyboard())
